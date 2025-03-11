@@ -1,0 +1,10 @@
+.env
+env/
+__pycache__/
+.mypy_cache/
+reserve/
+wsl2win/
+.flake8
+.pylintrc
+.mypy.ini
+*.log
