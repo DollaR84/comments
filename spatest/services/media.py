@@ -1,6 +1,7 @@
 from PIL import Image
 
 from .base import BaseManager
+from .types import FileType
 
 
 class MediaManager(BaseManager):
@@ -8,6 +9,10 @@ class MediaManager(BaseManager):
     @property
     def allowed_type(self) -> bool:
         return self.check_extension(self.config.media.types)
+
+    @property
+    def hash_sum(self) -> str:
+        return self.get_hash_sum(FileType.image)
 
     def check_sizes(self, image: Image) -> bool:
         try:
@@ -23,8 +28,10 @@ class MediaManager(BaseManager):
         image.thumbnail((self.config.media.max_width, self.config.media.max_height))
         return image
 
-    def save_image(self) -> None:
+    def save(self) -> str:
+        file_path = self.get_file_path(FileType.image)
         with Image.open(self.filename) as image:
             if not self.check_sizes(image):
                 image = self.resize(image)
-            image.save(self.filename)
+            image.save(file_path)
+        return file_path

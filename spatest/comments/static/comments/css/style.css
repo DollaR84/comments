@@ -1,0 +1,17 @@
+/*
+* Style for comments
+*
+* created on 12.03.2025
+*
+* author: Ruslan Dolovaniuk
+*
+*/
+
+.comment-title {
+  background: #007bff;
+  color: #F8F9FA;
+}
+
+.comment-body {
+  background: #50E2DA;
+}
