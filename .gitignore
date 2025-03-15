@@ -3,6 +3,7 @@ env/
 __pycache__/
 .mypy_cache/
 reserve/
+tests/
 wsl2win/
 .flake8
 .pylintrc

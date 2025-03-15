@@ -31,6 +31,25 @@ class CommentForm(forms.Form):
 
     def clean_text(self) -> str:
         data: str = self.cleaned_data['text']
+        closing_tag: Optional[str] = None
+        for tag in re.findall(r"<[^>]*>", data):
+            if closing_tag:
+                if tag != closing_tag:
+                    ValidationError(f"There is no closing tag: '{closing_tag}'")
+                closing_tag = None
+
+            elif tag == "<strong>":
+                closing_tag = "</strong>"
+            elif tag == "<i>":
+                closing_tag = "</i>"
+            elif tag == "<code>":
+                closing_tag = "</code>"
+            elif tag.startswith("<a "):
+                if "title" not in tag:
+                    ValidationError("attribute 'title' for tag '<a>' is needed")
+                closing_tag = "</a>"
+            else:
+                ValidationError(f"tag '{tag}' is not valid")
         return data
 
     def clean_file(self) -> Any:
