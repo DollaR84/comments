@@ -4,8 +4,8 @@
 {% block description %}<meta name="description" content="comments test">{% endblock %}
 {% block keywords %}<meta name="keywords" content="comments, SPA test">{% endblock %}
 {% block style %}
-{{ block.super }}
-<link rel="stylesheet" href="{% static 'comments/css/style.css' %}">
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'comments/css/style.css' %}">
 {% endblock %}
 {% block header %}
 <div class="row">
@@ -21,22 +21,123 @@
 <div class="row">
     <div class="col-12 mt-3 w-80">
         <h3 class="card-title">List comments:</h3>
-        {% for comment in data.comments %}
-        <p class="card-text"><div class="text-center"><h5 class="comment-title">{{ comment.user.username }}</h5></div>
-        <div class="text-left"><p>{{ comment.datetime }}</p></div>
-        <p class="lead comment-body">{{ comment.text }}</p>
+        {% for comment in comments %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="card-title">{{ comment.user.username }}</h5>
+                    <p class="card-text"><small class="text-muted">{{ comment.date_time }}</small></p>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ comment.text|safe }}</p>
+                    {% if comment.files.all %}
+                        <p class="card-text">
+                        {% for file in comment.files.all %}
+                            <a href="{{ file.file_path.url }}" target="_blank">{{ file.file_name }}</a>
+                        {% endfor %}
+                        </p>
+                    {% endif %}
+                    <button type="button" class="btn btn-secondary reply-btn" onclick="replyComment({{ comment.id }})">
+                    Answer</button>
+                </div>
+                {% if comment.parent_comment.all %}
+                    <div class="nested-comment">
+                        {% for reply in comment.parent_comment.all %}
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h5 class="card-title">{{ reply.user.username }}</h5>
+                                    <p class="card-text"><small class="text-muted">{{ reply.date_time }}</small></p>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">{{ reply.text|safe }}</p>
+                                    {% if reply.files.all %}
+                                        <p class="card-text">
+                                        {% for file in reply.files.all %}
+                                            <a href="{{ file.file_path.url }}" target="_blank">{{ file.file_name }}</a>
+                                        {% endfor %}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
         {% endfor %}
+        <div class="pagination">
+            <span class="step-links">
+            {% if comments.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ comments.previous_page_number }}">previous</a>
+            {% endif %}
+            <span class="current">
+            Page {{ comments.number }} of {{ comments.paginator.num_pages }}.
+            </span>
+            {% if comments.has_next %}
+                <a href="?page={{ comments.next_page_number }}">next</a>
+                <a href="?page={{ comments.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+            </span>
+        </div>
     </div> <!-- .col -->
 </div> <!-- .row -->
 
 <div class="row">
     <div class="col-sm-6 col-sm-offset-3 mt-3">
         <h3>Send comment:</h3>
-        <form action="" method="POST">
+        <form id="commentForm" action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            <p>{{ form }}</p>
-            <button type="submit" class="btn btn-default btn-success pull-right">submit</button>
+            <input type="hidden" id="parent_id" name="parent_id" value="">
+            <div class="form-group">
+                <label for="username">User Name</label>
+                {{ form.username }}
+            </div>
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                {{ form.email }}
+            </div>
+            <div class="form-group">
+                <label for="home_page">Home Page</label>
+                {{ form.home_page }}
+            </div>
+            <div class="form-group">
+                <label for="text">Text</label>
+                {{ form.text }}
+            </div>
+            <div class="form-group">
+                <label for="file">File</label>
+                {{ form.file }}
+            </div>
+            <div class="btn-toolbar" role="toolbar">
+                <div class="btn-group mr-2" role="group">
+                    <button type="button" class="btn btn-secondary" onclick="insertTag('i')">[i]</button>
+                    <button type="button" class="btn btn-secondary" onclick="insertTag('strong')">[strong]</button>
+                    <button type="button" class="btn btn-secondary" onclick="insertTag('code')">[code]</button>
+                    <button type="button" class="btn btn-secondary" onclick="insertTag('a')">[a]</button>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success pull-right">Submit</button>
         </form>
     </div> <!-- .col -->
 </div> <!-- .row -->
+
+<script>
+    function insertTag(tag) {
+        const textarea = document.getElementById('id_text');
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selectedText = textarea.value.substring(start, end);
+        let tagText = '';
+
+        if (tag === 'a') {
+            const url = prompt('Enter url:');
+            tagText = `<a href="${url}" title="">${selectedText}</a>`;
+        } else {
+            tagText = `<${tag}>${selectedText}</${tag}>`;
+        }
+
+        textarea.value = textarea.value.substring(0, start) + tagText + textarea.value.substring(end);
+        textarea.focus();
+        textarea.setSelectionRange(start + tagText.length, start + tagText.length);
+    }
+</script>
 {% endblock %}

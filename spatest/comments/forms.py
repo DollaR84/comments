@@ -12,7 +12,7 @@ class CommentForm(forms.Form):
     username = forms.CharField(max_length=50, label="username", help_text="Enter your own username")
     email = forms.EmailField(label="email", help_text="Enter your own email")
     home_page = forms.UrlField(required=False, label="home page", help_text="Enter your own home page")
-    text = forms.TextField(label="text comment", help_text="Enter your own comment")
+    text = forms.CharField(widget=forms.Textarea, label="text comment", help_text="Enter your own comment")
     file = forms.FileField(required=False, label="file", help_text="Enter your own file")
 
     def clean_username(self) -> str:

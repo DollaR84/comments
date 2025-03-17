@@ -1,3 +1,6 @@
+import os
+from typeing import Optional
+
 from django.db import models
 
 
@@ -10,10 +13,10 @@ class User(models.Model):
         verbose_name = "User"
         verbose_name_plural = "Users"
 
-    id = models.BigAutoField(primary_key=True)
-    username = models.CharField(max_length=50, null=False, blank=False, unique=True)
-    email = models.EmailField(null=False, blank=False, unique=True)
-    home_page = models.URLField(null=True, blank=True, verbose_name="home page")
+    id: int = models.BigAutoField(primary_key=True)
+    username: str = models.CharField(max_length=50, null=False, blank=False)
+    email: str = models.EmailField(null=False, blank=False, unique=True)
+    home_page: Optional[str] = models.URLField(null=True, blank=True, verbose_name="home page")
 
 
 class FileUpload(models.Model):
@@ -32,9 +35,13 @@ class File(models.Model):
         verbose_name = "File"
         verbose_name_plural = "Files"
 
-    id = models.BigAutoField(primary_key=True)
-    file_path = models.CharField(max_length=256, unique=True)
-    hash_sum = models.CharField(max_length=64, editable=False, unique=True)
+    id: int = models.BigAutoField(primary_key=True)
+    file_path: str = models.CharField(max_length=256, unique=True)
+    hash_sum: str = models.CharField(max_length=64, editable=False, unique=True)
+
+    @property
+    def file_name(self) -> str:
+        return os.path.basename(self.file_path)
 
 
 class Comment(models.Model):
